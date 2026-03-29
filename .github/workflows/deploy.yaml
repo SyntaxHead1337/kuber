@@ -31,10 +31,11 @@ jobs:
       # 5️⃣ Setup kubectl
       - name: Setup kubectl
         run: |
+          mkdir -p $HOME/.kube
           echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
-      # 6️⃣ Update Kubernetes Deployment
+      # 6️⃣ Deploy to k3s
       - name: Deploy to k3s
         run: |
           kubectl set image deployment/flask-app flask-app=syntaxhead1337/kuber:latest
