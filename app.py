@@ -3,52 +3,55 @@ import pymysql
 
 app = Flask(__name__)
 
+# base route for all API endpoints
+BASE_ROUTE = "/api"
+
 def get_connection():
     return pymysql.connect(
-        host="mariadb",
+        host="mariadb",  # Service-Name in k8s
         user="user",
         password="password",
         database="mydb"
     )
 
-@app.route("/")
+@app.route(BASE_ROUTE)
 def home():
     return "Flask + MariaDB läuft 🚀"
 
-@app.route("/init")
+@app.route(f"{BASE_ROUTE}/init")
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
-
+    
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS test (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255)
         )
     """)
-
+    
     conn.commit()
     conn.close()
     return "Table created!"
 
-@app.route("/add/<name>")
-def add(name):
+@app.route(f"{BASE_ROUTE}/add/<name>")
+def add_name(name):
     conn = get_connection()
     cursor = conn.cursor()
-
+    
     cursor.execute("INSERT INTO test (name) VALUES (%s)", (name,))
     conn.commit()
     conn.close()
+    
+    return f"Added {name}!"
 
-    return f"{name} added!"
-
-@app.route("/get")
-def get():
+@app.route(f"{BASE_ROUTE}/get")
+def get_names():
     conn = get_connection()
     cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM test")
-    result = cursor.fetchall()
-
+    
+    cursor.execute("SELECT id, name FROM test")
+    results = cursor.fetchall()
     conn.close()
-    return str(result)
+    
+    return {"results": [{"id": r[0], "name": r[1]} for r in results]}
