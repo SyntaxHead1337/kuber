@@ -55,3 +55,6 @@ def get_names():
     conn.close()
     
     return {"results": [{"id": r[0], "name": r[1]} for r in results]}
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

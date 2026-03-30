@@ -1,14 +1,27 @@
 #!/bin/bash
-# Deploy lokal auf k3s
+# Deploy lokal auf k3s mit Rollout, PVC Check und Logs
 
-# 1️⃣ Image in Deployment aktualisieren
-kubectl set image deployment/flask-app flask-app=syntaxhead1337/kuber:latest
+DEPLOYMENT_NAME="flask-app"
+CONTAINER_NAME="flask-app"
+IMAGE="syntaxhead1337/kuber:latest"
 
-# 2️⃣ Warten, bis Rollout abgeschlossen ist
-kubectl rollout status deployment/flask-app
+echo "===1. Update Image im Deployment ==="
+kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=$IMAGE
 
-# 3️⃣ Pods und Services anzeigen
-echo "=== Pods ==="
+echo "===2. Warten auf Rollout ==="
+kubectl rollout status deployment/$DEPLOYMENT_NAME
+
+echo "===3. Prüfen, ob MariaDB PVC existiert ==="
+kubectl get pvc mariadb-pvc || echo "⚠️ PVC mariadb-pvc nicht gefunden!"
+
+echo "===4. Pods und Services anzeigen ==="
 kubectl get pods
-echo "=== Services ==="
 kubectl get svc
+
+echo "===5. Optional: DB Init testen ==="
+kubectl exec -it $(kubectl get pod -l app=flask-app -o jsonpath="{.items[0].metadata.name}") -- python -c "
+import requests
+r = __import__('requests').get('http://localhost:5000/api/init')
+print(r.text)"
+
+echo "✅ Deployment abgeschlossen. Teste: curl http://localhost:30007/api/get"
