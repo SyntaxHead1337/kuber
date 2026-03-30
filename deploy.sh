@@ -12,7 +12,7 @@ echo "===2. Warten auf Rollout ==="
 kubectl rollout status deployment/$DEPLOYMENT_NAME
 
 echo "===3. Prüfen, ob MariaDB PVC existiert ==="
-kubectl get pvc mariadb-pvc || echo "⚠️ PVC mariadb-pvc nicht gefunden!"
+kubectl get pvc mariadb-pvc || echo " PVC mariadb-pvc nicht gefunden!"
 
 echo "===4. Pods und Services anzeigen ==="
 kubectl get pods
